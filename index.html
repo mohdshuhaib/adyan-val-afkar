@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MCQ Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Malayalam:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preload" href="correct.mp3" as="audio" type="audio/mpeg" />
+    <link rel="preload" href="wrong.mp3" as="audio" type="audio/mpeg" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="quiz-panel" aria-label="MCQ quiz">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">MCQ Platform</p>
+            <h1>Adyan Val Afkar</h1>
+          </div>
+          <div class="top-actions">
+            <button class="icon-btn" id="soundToggle" type="button" aria-label="Toggle sound" title="Toggle sound">
+              <span aria-hidden="true">♪</span>
+            </button>
+            <button class="refresh-btn" id="refreshQuiz" type="button">
+              <span aria-hidden="true">↻</span>
+              Refresh
+            </button>
+          </div>
+        </header>
+
+        <section class="controls" aria-label="Question filters">
+          <div class="filter-group" role="group" aria-label="Category filter">
+            <button class="filter-pill is-active" type="button" data-filter="all">Both</button>
+            <button class="filter-pill" type="button" data-filter="ചിന്തകളും ഇസങ്ങളും">ചിന്തകളും ഇസങ്ങളും</button>
+            <button class="filter-pill" type="button" data-filter="ഭാരതീയ മതങ്ങൾ">ഭാരതീയ മതങ്ങൾ</button>
+          </div>
+          <button class="question-map-btn" id="openQuestionMap" type="button">
+            <span aria-hidden="true">#</span>
+            Questions
+          </button>
+        </section>
+
+        <section class="progress-wrap" aria-label="Quiz progress">
+          <div class="progress-copy">
+            <span id="progressText">Question 1 of 1</span>
+            <span id="answeredText">0 answered</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </section>
+
+        <article class="question-card" id="questionCard">
+          <div class="question-meta">
+            <span class="badge" id="categoryBadge">Category</span>
+            <span class="question-index" id="questionIndex">01</span>
+          </div>
+          <h2 id="questionText">Loading question...</h2>
+          <div class="options-grid" id="optionsGrid"></div>
+          <div class="option-notes" id="optionNotes" hidden></div>
+        </article>
+
+        <footer class="quiz-footer">
+          <button class="nav-btn arrow-btn" id="previousQuestion" type="button" aria-label="Previous question">
+            <span aria-hidden="true">&larr;</span>
+          </button>
+          <button class="submit-btn" id="submitQuiz" type="button" disabled>Submit Quiz</button>
+          <button class="nav-btn arrow-btn" id="nextQuestion" type="button" aria-label="Next question">
+            <span aria-hidden="true">&rarr;</span>
+          </button>
+        </footer>
+
+        <section class="result-panel" id="resultPanel" hidden aria-live="polite"></section>
+      </section>
+    </main>
+
+    <dialog class="question-modal" id="questionModal">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">Jump to</p>
+          <h2>Question Numbers</h2>
+        </div>
+        <button class="icon-btn" id="closeQuestionMap" type="button" aria-label="Close question list">×</button>
+      </div>
+      <div class="modal-grid" id="questionNumberGrid"></div>
+    </dialog>
+
+    <script src="questions-data.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
