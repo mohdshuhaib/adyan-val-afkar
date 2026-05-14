@@ -1,4 +1,4 @@
-const STORAGE_KEY = "adyan-val-afkar-mcq-state-v2";
+const STORAGE_KEY = "adyan-val-afkar-mcq-state-v3";
 
 const categories = {
   ideas: "ചിന്തകളും ഇസങ്ങളും",
@@ -155,7 +155,7 @@ function renderQuestion() {
       const reveal = selected !== undefined;
       const resultClass = reveal && index === question.answer ? "is-correct" : reveal && isSelected ? "is-wrong" : "";
       return `
-        <button class="option-btn ${isSelected ? "is-selected" : ""} ${resultClass}" type="button" data-option="${index}">
+        <button class="option-btn ${isSelected ? "is-selected" : ""} ${resultClass}" type="button" data-option="${index}" ${reveal ? "disabled" : ""}>
           ${String.fromCharCode(65 + index)}. ${option}
         </button>
       `;
@@ -195,7 +195,7 @@ function renderQuestionMap() {
 
 function selectOption(index) {
   const question = currentQuestion();
-  if (!question || state.submitted) return;
+  if (!question || state.submitted || state.answers[question.id] !== undefined) return;
   state.answers[question.id] = index;
   playTone(index === question.answer ? "success" : "error");
   renderQuestion();
