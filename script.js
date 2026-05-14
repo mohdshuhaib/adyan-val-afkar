@@ -1,4 +1,4 @@
-const STORAGE_KEY = "adyan-val-afkar-mcq-state-v3";
+const STORAGE_KEY = "adyan-val-afkar-mcq-state-v4";
 
 const categories = {
   ideas: "ചിന്തകളും ഇസങ്ങളും",
@@ -9,6 +9,7 @@ const questions = window.quizQuestions || [];
 
 let state = {
   order: [],
+  optionOrders: {},
   current: 0,
   answers: {},
   filter: "all",
@@ -55,6 +56,14 @@ function shuffle(items) {
     .map(({ item }) => item);
 }
 
+function optionOrderFor(question) {
+  if (!Array.isArray(state.optionOrders[question.id]) || state.optionOrders[question.id].length !== question.options.length) {
+    state.optionOrders[question.id] = shuffle(question.options.map((_, index) => index));
+  }
+
+  return state.optionOrders[question.id];
+}
+
 function getFilteredQuestions() {
   const ordered = state.order.map((id) => questions.find((question) => question.id === id)).filter(Boolean);
   return state.filter === "all" ? ordered : ordered.filter((question) => question.category === state.filter);
@@ -72,6 +81,8 @@ function loadState() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (!saved) {
     state.order = shuffle(questions.map((question) => question.id));
+    state.optionOrders = {};
+    questions.forEach((question) => optionOrderFor(question));
     saveState();
     return;
   }
@@ -83,12 +94,16 @@ function loadState() {
       ...state,
       ...parsed,
       order: Array.isArray(parsed.order) ? parsed.order.filter((id) => validIds.has(id)) : [],
+      optionOrders: parsed.optionOrders && typeof parsed.optionOrders === "object" ? parsed.optionOrders : {},
       answers: parsed.answers && typeof parsed.answers === "object" ? parsed.answers : {},
     };
     const missing = questions.map((question) => question.id).filter((id) => !state.order.includes(id));
     state.order = [...state.order, ...shuffle(missing)];
+    questions.forEach((question) => optionOrderFor(question));
   } catch {
     state.order = shuffle(questions.map((question) => question.id));
+    state.optionOrders = {};
+    questions.forEach((question) => optionOrderFor(question));
   }
 }
 
@@ -146,17 +161,19 @@ function renderQuestion() {
   }
 
   const selected = state.answers[question.id];
+  const optionOrder = optionOrderFor(question);
   els.categoryBadge.textContent = question.category;
   els.questionIndex.textContent = String(state.current + 1).padStart(2, "0");
   els.questionText.textContent = question.question;
-  els.optionsGrid.innerHTML = question.options
-    .map((option, index) => {
-      const isSelected = selected === index;
+  els.optionsGrid.innerHTML = optionOrder
+    .map((originalIndex, displayIndex) => {
+      const option = question.options[originalIndex];
+      const isSelected = selected === originalIndex;
       const reveal = selected !== undefined;
-      const resultClass = reveal && index === question.answer ? "is-correct" : reveal && isSelected ? "is-wrong" : "";
+      const resultClass = reveal && originalIndex === question.answer ? "is-correct" : reveal && isSelected ? "is-wrong" : "";
       return `
-        <button class="option-btn ${isSelected ? "is-selected" : ""} ${resultClass}" type="button" data-option="${index}" ${reveal ? "disabled" : ""}>
-          ${String.fromCharCode(65 + index)}. ${option}
+        <button class="option-btn ${isSelected ? "is-selected" : ""} ${resultClass}" type="button" data-option="${originalIndex}" ${reveal ? "disabled" : ""}>
+          ${String.fromCharCode(65 + displayIndex)}. ${option}
         </button>
       `;
     })
@@ -215,12 +232,14 @@ function submitQuiz() {
 function refreshQuiz() {
   state = {
     order: shuffle(questions.map((question) => question.id)),
+    optionOrders: {},
     current: 0,
     answers: {},
     filter: state.filter,
     submitted: false,
     sound: state.sound,
   };
+  questions.forEach((question) => optionOrderFor(question));
   els.resultPanel.hidden = true;
   saveState();
   playTone("select");
